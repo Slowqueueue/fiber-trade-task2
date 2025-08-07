@@ -1,0 +1,149 @@
+﻿<Window x:Class="FiberTradeTask2.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FiberTradeTask2" xmlns:viewmodels="clr-namespace:FiberTradeTask2.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=viewmodels:MainViewModel}"
+        Title="Генерация и обработка UDP трафика" Height="650" Width="900">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <GroupBox Grid.Row="0" Header="Сетевая карта">
+            <ComboBox ItemsSource="{Binding NetworkInterfaces}"
+                      SelectedItem="{Binding Settings.SelectedInterface}"
+                      DisplayMemberPath="Name"/>
+        </GroupBox>
+
+        <GroupBox Grid.Row="1" Header="Настройки трафика">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Content="IP-адрес отправки:"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.DestinationIp}"
+                         PreviewTextInput="IpValidation_PreviewTextInput" DataObject.Pasting="IpValidation_Pasting" 
+                         LostFocus="IpValidation_LostFocus" Margin="5"/>
+
+                <Label Grid.Row="1" Grid.Column="0" Content="Порт назначения (0-65535):"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.DestinationPort, ValidatesOnDataErrors=True}"
+                         PreviewTextInput="PortValidation_PreviewTextInput" DataObject.Pasting="PortValidation_Pasting"
+                         MaxLength="5" Margin="5"/>
+
+                <Label Grid.Row="2" Grid.Column="0" Content="Порт источника (0-65535):"/>
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.SourcePort, ValidatesOnDataErrors=True}"
+                         PreviewTextInput="PortValidation_PreviewTextInput" DataObject.Pasting="PortValidation_Pasting"
+                         MaxLength="5" Margin="5"/>
+
+                <Label Grid.Row="3" Grid.Column="0" Content="Нагрузка канала:"/>
+                <ComboBox Grid.Row="3" Grid.Column="1" SelectedValue="{Binding Settings.BandwidthBPS, Mode=TwoWay}"
+                          SelectedValuePath="Tag"
+                          Margin="5">
+                    <ComboBoxItem Content="1 Мбит/с" Tag="1000000"/>
+                    <ComboBoxItem Content="10 Мбит/с" Tag="10000000"/>
+                    <ComboBoxItem Content="100 Мбит/с" Tag="100000000"/>
+                    <ComboBoxItem Content="1 Гбит/с" Tag="1000000000"/>
+                </ComboBox>
+
+                <Label Grid.Row="4" Grid.Column="0" Content="Размер пакета (1-65535 байт):"/>
+                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Settings.PacketSizeBytes, ValidatesOnDataErrors=True}"
+                         PreviewTextInput="PortValidation_PreviewTextInput" DataObject.Pasting="PortValidation_Pasting"
+                         MaxLength="5" Margin="5"/>
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Grid.Row="2" Header="MAC-адрес (фильтр приема)">
+            <TextBox Text="{Binding Settings.MacAddressFilter}" PreviewTextInput="MacValidation_PreviewTextInput"
+                    DataObject.Pasting="MacValidation_Pasting"
+                    LostFocus="MacValidation_LostFocus" Margin="5"/>
+        </GroupBox>
+
+        <GroupBox Grid.Row="3" Header="Отправка файла">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Content="Файл для отправки:"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Settings.FilePath}" IsReadOnly="True" Margin="5"/>
+
+                <Button Grid.Row="0" Grid.Column="2" Content="Обзор..." Command="{Binding BrowseFileCommand}" Margin="5"/>
+
+                <Label Grid.Row="1" Grid.Column="0" Content="Путь для сохранения:"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.SavePath}" IsReadOnly="True" Margin="5"/>
+
+                <Button Grid.Row="1" Grid.Column="2" Content="Обзор..." Command="{Binding BrowseSavePathCommand}" Margin="5"/>
+            </Grid>
+        </GroupBox>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10">
+            <Button Content="Начать отправку" Command="{Binding StartSendingCommand}" Margin="5" Width="135"/>
+            <Button Content="Прекратить отправку" Command="{Binding StopSendingCommand}" Margin="5" Width="135"/>
+            <Button Content="Начать получение" Command="{Binding StartReceivingCommand}" Margin="5" Width="135"/>
+            <Button Content="Прекратить получение" Command="{Binding StopReceivingCommand}" Margin="5" Width="135"/>
+            <Button Content="Отправить файл" Command="{Binding SendFileCommand}" Margin="5" Width="135"/>
+            <Button Content="Получить файл" Command="{Binding ReceiveFileCommand}" Margin="5" Width="135"/>
+        </StackPanel>
+
+        <GroupBox Grid.Row="5" Header="Статистика">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Content="Отправлено пакетов:"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Statistics.SentPackets}" IsReadOnly="True"/>
+
+                <Label Grid.Row="1" Grid.Column="0" Content="Получено пакетов:"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Statistics.ReceivedPackets}" IsReadOnly="True"/>
+
+                <Label Grid.Row="2" Grid.Column="0" Content="Отправлено байт:"/>
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Statistics.SentBytes}" IsReadOnly="True"/>
+
+                <Label Grid.Row="3" Grid.Column="0" Content="Получено байт:"/>
+                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Statistics.ReceivedBytes}" IsReadOnly="True"/>
+            </Grid>
+        </GroupBox>
+
+        <Button Grid.Row="6" Content="Очистить статистику" Command="{Binding ClearStatisticsCommand}" Margin="5" Width="135"/>
+
+        <StatusBar Grid.Row="8">
+            <StatusBarItem>
+                <TextBlock Text="{Binding Status}"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>
