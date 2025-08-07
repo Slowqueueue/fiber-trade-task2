@@ -123,13 +123,16 @@ namespace FiberTradeTask2.ViewModels
             IsSending = true;
             Status = "Отправка UDP трафика...";
 
-            m_udpTrafficService.PacketSent += (sender, e) =>
-            {
-                Statistics.SentPackets++;
-                Statistics.SentBytes += e.PacketSize;
-            };
+            m_udpTrafficService.PacketSent -= OnPacketSent;
+            m_udpTrafficService.PacketSent += OnPacketSent;
 
             await m_udpTrafficService.StartSendingAsync(Settings);
+        }
+
+        private void OnPacketSent(object? sender, PacketEventArgs e)
+        {
+            Statistics.SentPackets++;
+            Statistics.SentBytes += e.PacketSize;
         }
 
         private void StopSending()
@@ -146,13 +149,16 @@ namespace FiberTradeTask2.ViewModels
             IsReceiving = true;
             Status = "Получение UDP трафика...";
 
-            m_udpTrafficService.PacketReceived += (sender, e) =>
-            {
-                Statistics.ReceivedPackets++;
-                Statistics.ReceivedBytes += e.PacketSize;
-            };
-            
+            m_udpTrafficService.PacketReceived -= OnPacketReceived;
+            m_udpTrafficService.PacketReceived += OnPacketReceived;
+
             await m_udpTrafficService.StartReceivingAsync(Settings);
+        }
+
+        private void OnPacketReceived(object? sender, PacketEventArgs e)
+        {
+            Statistics.ReceivedPackets++;
+            Statistics.ReceivedBytes += e.PacketSize;
         }
 
         private void StopReceiving()
